@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_schoolproject/screens/login_screen.dart';
+import 'package:device_preview/device_preview.dart';
+import 'screens/login_screen.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    DevicePreview(
+      enabled: true,
+      builder: (context) => const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -10,9 +16,11 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: LoginScreen(
-      ),
+    return MaterialApp(
+      builder: DevicePreview.appBuilder,
+      locale: DevicePreview.locale(context),
+      debugShowCheckedModeBanner: false,
+      home: const LoginScreen(),
     );
   }
 }
