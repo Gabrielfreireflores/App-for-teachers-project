@@ -9,9 +9,27 @@ class AlunosScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Alunos"),
       ),
-      body: const Center(
-        child: Text("Lista de Alunos"),
-      ),
+      body: ListView(
+  children: const [
+
+    ListTile(
+      title: Text("Maria Silva"),
+    ),
+
+    ListTile(
+      title: Text("João Souza"),
+    ),
+
+    ListTile(
+      title: Text("Ana Paula"),
+    ),
+
+    ListTile(
+      title: Text("Julia Santos"),
+    ),
+
+  ],
+),
     );
   }
 }

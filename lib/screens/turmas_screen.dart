@@ -9,9 +9,27 @@ class TurmasScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Turmas"),
       ),
-      body: const Center(
-        child: Text("Lista de Turmas"),
-      ),
+      body: ListView(
+  children: const [
+
+    ListTile(
+      title: Text("Matemática"),
+    ),
+
+    ListTile(
+      title: Text("Português"),
+    ),
+
+    ListTile(
+      title: Text("História"),
+    ),
+
+    ListTile(
+      title: Text("Geografia"),
+    ),
+
+  ],
+),
     );
   }
 }

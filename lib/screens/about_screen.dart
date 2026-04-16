@@ -10,9 +10,29 @@ class AboutScreen extends StatelessWidget {
         title: const Text("Sobre"),
       ),
       body: const Center(
-        child: Text(
-          "Aplicativo para gerenciamento escolar.\nProjeto acadêmico.",
-          textAlign: TextAlign.center,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "Aplicativo desenvolvido para auxiliar docentes no gerenciamento escolar de alunos, notas e avaliações.\nProjeto acadêmico.",
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 20),
+            Text(
+              "Desenvolvido por:\nGabriel Freire (Desenvolvedor backend)\n Milene Pereira(Desenvolvedor frontend)",
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 20),
+            Text(
+              "Instituição de ensino: FATEC - Faculdade de Tecnologia de Ribeirão Preto",
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 20),
+            Text(
+              "Professor: Rodrigo Plotze",
+              textAlign: TextAlign.center,
+            )
+          ],
         ),
       ),
     );

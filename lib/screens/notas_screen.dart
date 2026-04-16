@@ -9,9 +9,27 @@ class NotasScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text("Notas"),
       ),
-      body: const Center(
-        child: Text("Lançamento de Notas"),
-      ),
-    );
+      body: ListView(
+  children: const [
+
+    ListTile(
+      title: Text("Maria Silva - Matemática: 8.5"),
+    ),
+
+    ListTile(
+      title: Text("João Souza - Português: 7.0"),
+    ),
+
+    ListTile(
+      title: Text("Ana Paula - História: 9.0"),
+    ),
+
+    ListTile(
+      title: Text("Julia Santos - Geografia: 8.0"),
+    ),
+
+  ],
+),
+      );
   }
 }
