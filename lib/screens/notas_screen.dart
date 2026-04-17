@@ -1,18 +1,46 @@
 import 'package:flutter/material.dart';
 import '../widgets/app_layout.dart';
-import '../widgets/app_card.dart';
 
-class NotasScreen extends StatelessWidget {
+class NotasScreen extends StatefulWidget {
   const NotasScreen({super.key});
+
+  @override
+  State<NotasScreen> createState() => _NotasScreenState();
+}
+
+class _NotasScreenState extends State<NotasScreen> {
+
+  final aluno = TextEditingController();
+  final nota = TextEditingController();
+
+  void salvar() {
+    if (aluno.text.isEmpty || nota.text.isEmpty) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Preencha tudo")));
+      return;
+    }
+
+    showDialog(
+      context: context,
+      builder: (_) => const AlertDialog(
+        title: Text("Sucesso"),
+        content: Text("Nota salva!"),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return AppLayout(
       title: "Notas",
       child: Column(
-        children: const [
-          AppCard(title: "João - 8.5", icon: Icons.grade),
-          AppCard(title: "Maria - 9.0", icon: Icons.grade),
+        children: [
+          TextField(controller: aluno, decoration: const InputDecoration(labelText: "Aluno")),
+          TextField(controller: nota, decoration: const InputDecoration(labelText: "Nota")),
+
+          const SizedBox(height: 20),
+
+          ElevatedButton(onPressed: salvar, child: const Text("Salvar")),
         ],
       ),
     );

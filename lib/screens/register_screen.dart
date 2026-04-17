@@ -78,6 +78,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
             const SizedBox(height: 20),
 
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
               onPressed: cadastrar,
               child: const Text("Cadastrar"),
             ),

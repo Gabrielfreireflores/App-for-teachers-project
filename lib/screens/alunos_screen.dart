@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
 import '../widgets/app_layout.dart';
-import '../widgets/app_card.dart';
 
 class AlunosScreen extends StatelessWidget {
   const AlunosScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    List<String> alunos = ["João", "Maria", "Ana"];
+
     return AppLayout(
       title: "Alunos",
-      child: Column(
-        children: const [
-          AppCard(title: "João", icon: Icons.person),
-          AppCard(title: "Maria", icon: Icons.person),
-          AppCard(title: "Ana", icon: Icons.person),
-        ],
+      child: ListView.builder(
+        itemCount: alunos.length,
+        itemBuilder: (_, i) => Card(
+          child: ListTile(
+            leading: const Icon(Icons.person),
+            title: Text(alunos[i]),
+          ),
+        ),
       ),
     );
   }
 }
- 

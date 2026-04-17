@@ -3,6 +3,9 @@ import 'turmas_screen.dart';
 import 'alunos_screen.dart';
 import 'notas_screen.dart';
 import 'about_screen.dart';
+import 'avaliacoes_screen.dart';
+import 'media_screen.dart';
+import '../utils/app_routes.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -37,7 +40,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  // 🔹 MENU LATERAL (WEB)
+  // MENU LATERAL (WEB)
   Widget _buildSideMenu(BuildContext context) {
     return NavigationRail(
       selectedIndex: 0,
@@ -46,19 +49,19 @@ class DashboardScreen extends StatelessWidget {
         switch (index) {
           case 0:
             Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const TurmasScreen()));
+                createRoute(const TurmasScreen()));
             break;
           case 1:
             Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const AlunosScreen()));
+                createRoute(const AlunosScreen()));
             break;
           case 2:
             Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const NotasScreen()));
+                createRoute(const NotasScreen()));
             break;
           case 3:
             Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const AboutScreen()));
+                createRoute(const AboutScreen()));
             break;
         }
       },
@@ -83,7 +86,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  // 🔹 GRID PRINCIPAL
+  // GRID PRINCIPAL
   Widget _buildGrid(BuildContext context, int crossAxisCount) {
     return Padding(
       padding: const EdgeInsets.all(16),
@@ -96,20 +99,22 @@ class DashboardScreen extends StatelessWidget {
           _buildCard(context, "Alunos", Icons.people, const AlunosScreen()),
           _buildCard(context, "Notas", Icons.grade, const NotasScreen()),
           _buildCard(context, "Sobre", Icons.info, const AboutScreen()),
+          _buildCard(context, "Avaliações", Icons.event, const AvaliacoesScreen()),
+          _buildCard(context, "Médias", Icons.bar_chart, const MediaScreen()),
         ],
       ),
     );
   }
 
-  // 🔹 CARD BONITO
+  // CARD DO DASHBOARD
   Widget _buildCard(
       BuildContext context, String title, IconData icon, Widget screen) {
     return InkWell(
       onTap: () {
         Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => screen),
-        );
+         context,
+          createRoute(screen),
+      );
       },
       borderRadius: BorderRadius.circular(16),
       child: Container(

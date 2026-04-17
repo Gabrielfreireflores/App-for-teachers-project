@@ -1,7 +1,9 @@
+import 'package:app_for_teachers_project/widgets/app_logo.dart';
 import 'package:flutter/material.dart';
 import 'dashboard_screen.dart';
 import 'register_screen.dart';
 import 'forgot_password_screen.dart';
+import '../utils/app_routes.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -49,7 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Login")),
+      appBar: AppBar(title: const AppLogo()),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -58,7 +60,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
             TextField(
               controller: emailController,
-              decoration: const InputDecoration(labelText: "Email"),
+              decoration: InputDecoration(labelText: "Email",
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide.none,
+                ),
+              ),
             ),
 
             const SizedBox(height: 10),
@@ -66,12 +75,25 @@ class _LoginScreenState extends State<LoginScreen> {
             TextField(
               controller: senhaController,
               obscureText: true,
-              decoration: const InputDecoration(labelText: "Senha"),
+              decoration: InputDecoration(labelText: "Senha",
+              filled: true,
+              fillColor: Colors.white,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(14),
+                borderSide: BorderSide.none,
+              ),
+              ),
             ),
 
             const SizedBox(height: 20),
 
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
               onPressed: login,
               child: const Text("Entrar"),
             ),
@@ -86,8 +108,10 @@ class _LoginScreenState extends State<LoginScreen> {
 
             TextButton(
               onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()));
+                Navigator.push(
+                 context,
+                  createRoute(const DashboardScreen()),
+               );
               },
               child: const Text("Esqueceu a senha?"),
             ),

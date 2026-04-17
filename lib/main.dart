@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
 import 'screens/login_screen.dart';
+import 'screens/loading_screen.dart';
 
 void main() {
   runApp(
@@ -18,40 +19,36 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        textTheme: const TextTheme(
-  headlineSmall: TextStyle(
-    fontSize: 22,
-    fontWeight: FontWeight.bold,
-    color: Color(0xFF0F3D3E),
+  fontFamily: 'Roboto',
+  scaffoldBackgroundColor: const Color(0xFFF5F7F9),
+
+  colorScheme: ColorScheme.fromSeed(
+    seedColor: const Color(0xFF0F3D3E),
+    primary: const Color(0xFF0F3D3E),
+    secondary: const Color(0xFFA8E6CF),
   ),
-  bodyMedium: TextStyle(
-    fontSize: 14,
-    color: Colors.black87,
-  ),
-),
-  primaryColor: const Color(0xFF0F3D3E),
-  scaffoldBackgroundColor: const Color(0xFFF5F5F5),
 
   appBarTheme: const AppBarTheme(
-    backgroundColor: Color(0xFF0F3D3E),
-    foregroundColor: Colors.white,
-    centerTitle: true,
+    backgroundColor: Colors.transparent,
+    elevation: 0,
+    foregroundColor: Colors.black,
   ),
 
-  elevatedButtonTheme: ElevatedButtonThemeData(
-    style: ElevatedButton.styleFrom(
-      backgroundColor: const Color(0xFFA8E6CF),
-      foregroundColor: Colors.black,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
+  textTheme: const TextTheme(
+    headlineSmall: TextStyle(
+      fontSize: 22,
+      fontWeight: FontWeight.bold,
+    ),
+    bodyMedium: TextStyle(
+      fontSize: 14,
+      color: Colors.black87,
     ),
   ),
 ),
       builder: DevicePreview.appBuilder,
       locale: DevicePreview.locale(context),
       debugShowCheckedModeBanner: false,
-      home: const LoginScreen(),
+      home: const LoadingScreen(),
     );
   }
 }
