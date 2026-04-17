@@ -29,20 +29,23 @@ class _LoadingScreenState extends State<LoadingScreen> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
+          children: [
 
-            Icon(Icons.school, color: Colors.white, size: 60),
+            Image.asset(
+             'assets/images/logo.png',
+               height: 100,
+            ),
 
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-            Text(
+            const Text(
               "Teacher's Best Friend",
               style: TextStyle(color: Colors.white, fontSize: 20),
             ),
 
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
 
-            CircularProgressIndicator(color: Colors.white),
+            const CircularProgressIndicator(color: Colors.white),
           ],
         ),
       ),

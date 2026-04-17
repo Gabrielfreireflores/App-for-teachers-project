@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import '../widgets/app_layout.dart';
-import '../widgets/app_card.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return AppLayout(
+    return const AppLayout(
   title: "Sobre",
   child: Center(
     child: Column(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: const [
+      children: [
 
         Text(
           "Aplicativo desenvolvido para auxiliar docentes no gerenciamento escolar de alunos, notas e avaliações.\nProjeto acadêmico.",

@@ -1,8 +1,6 @@
-import 'package:app_for_teachers_project/widgets/app_logo.dart';
 import 'package:flutter/material.dart';
 import 'dashboard_screen.dart';
 import 'register_screen.dart';
-import 'forgot_password_screen.dart';
 import '../utils/app_routes.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -51,7 +49,10 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const AppLogo()),
+      appBar: AppBar(title: Image.asset(
+        "assets/images/logo.png",
+        height: 60,
+        )),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
