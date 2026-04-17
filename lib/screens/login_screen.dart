@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'dashboard_screen.dart';
 import 'register_screen.dart';
+import 'forgot_password_screen.dart';
+import '../providers/auth_provider.dart';
 import '../utils/app_routes.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -14,13 +17,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
   final emailController = TextEditingController();
   final senhaController = TextEditingController();
+  bool _carregando = false;
 
   bool validarEmail(String email) {
     return email.contains("@") && email.contains(".");
   }
 
-  void login() {
-    String email = emailController.text;
+  Future<void> login() async {
+    String email = emailController.text.trim();
     String senha = senhaController.text;
 
     if (email.isEmpty || senha.isEmpty) {
@@ -33,7 +37,19 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    // Simulação de login válido
+    setState(() => _carregando = true);
+
+    final provider = context.read<AuthProvider>();
+    final erro = await provider.login(email, senha);
+
+    if (!mounted) return;
+    setState(() => _carregando = false);
+
+    if (erro != null) {
+      _mostrarErro(erro);
+      return;
+    }
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (_) => const DashboardScreen()),
@@ -95,8 +111,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              onPressed: login,
-              child: const Text("Entrar"),
+              onPressed: _carregando ? null : login,
+              child: _carregando
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text("Entrar"),
             ),
 
             TextButton(
@@ -107,12 +129,13 @@ class _LoginScreenState extends State<LoginScreen> {
               child: const Text("Cadastrar"),
             ),
 
+            // CORREÇÃO RF003: era createRoute(const DashboardScreen())
             TextButton(
               onPressed: () {
                 Navigator.push(
-                 context,
-                  createRoute(const DashboardScreen()),
-               );
+                  context,
+                  createRoute(const ForgotPasswordScreen()),
+                );
               },
               child: const Text("Esqueceu a senha?"),
             ),

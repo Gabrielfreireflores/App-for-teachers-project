@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../widgets/app_layout.dart';
 
+
+
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
@@ -28,20 +30,27 @@ class AboutScreen extends StatelessWidget {
         SizedBox(height: 20),
 
         Text(
-          "Instituição de ensino: FATEC - Faculdade de Tecnologia de Ribeirão Preto",
+          "Disciplina: Programação para Dispositivos Móveis\nInstituição de ensino: FATEC - Faculdade de Tecnologia de Ribeirão Preto",
           textAlign: TextAlign.center,
         ),
 
         SizedBox(height: 20),
 
         Text(
+          "Versão 1.0.0",
+          textAlign: TextAlign.center,
+        ),
+
+        SizedBox(height:  20),
+
+        Text(
           "Professor: Rodrigo Plotze",
           textAlign: TextAlign.center,
         ),
 
-      ],
-    ),
-  ),
-);
+         ],
+        ),
+      ),
+    );
   }
 }

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -14,46 +16,40 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final telefone = TextEditingController();
   final senha = TextEditingController();
   final confirmarSenha = TextEditingController();
+  final bool _carregando = false;
 
-  bool validarEmail(String email) {
-    return email.contains("@") && email.contains(".");
+Future<void> cadastrar() async {
+  final provider = context.read<AuthProvider>();
+
+  final erro = await provider.cadastrarUsuario(
+    nome.text.trim(),
+    email.text.trim(),
+    telefone.text.trim(),
+    senha.text,
+    confirmarSenha.text,
+  );
+
+  if (!mounted) return;
+
+  if (erro != null) {
+    _erro(erro);
+    return;
   }
 
-  void cadastrar() {
-    if (nome.text.isEmpty ||
-        email.text.isEmpty ||
-        telefone.text.isEmpty ||
-        senha.text.isEmpty ||
-        confirmarSenha.text.isEmpty) {
-
-      _erro("Preencha todos os campos");
-      return;
-    }
-
-    if (!validarEmail(email.text)) {
-      _erro("E-mail inválido");
-      return;
-    }
-
-    if (senha.text != confirmarSenha.text) {
-      _erro("As senhas não coincidem");
-      return;
-    }
-
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text("Sucesso"),
-        content: const Text("Cadastro realizado com sucesso!"),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("OK"),
-          )
-        ],
-      ),
-    );
-  }
+  showDialog(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text("Sucesso"),
+      content: const Text("Cadastro realizado com sucesso!"),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text("OK"),
+        )
+      ],
+    ),
+  );
+}
 
   void _erro(String msg) {
     ScaffoldMessenger.of(context)
@@ -71,7 +67,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
             TextField(controller: nome, decoration: const InputDecoration(labelText: "Nome")),
             TextField(controller: email, decoration: const InputDecoration(labelText: "Email")),
-            TextField(controller: telefone, decoration: const InputDecoration(labelText: "Telefone")),
+            TextField(
+              controller: telefone,
+              keyboardType: TextInputType.phone,
+              decoration: const InputDecoration(labelText: "Telefone"),
+            ),
             TextField(controller: senha, obscureText: true, decoration: const InputDecoration(labelText: "Senha")),
             TextField(controller: confirmarSenha, obscureText: true, decoration: const InputDecoration(labelText: "Confirmar senha")),
 
@@ -84,8 +84,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              onPressed: cadastrar,
-              child: const Text("Cadastrar"),
+              onPressed: _carregando ? null : cadastrar,
+              child: _carregando
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text("Cadastrar"),
             ),
           ],
         ),

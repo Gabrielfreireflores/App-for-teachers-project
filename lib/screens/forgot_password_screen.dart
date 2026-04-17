@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -10,12 +12,13 @@ class ForgotPasswordScreen extends StatefulWidget {
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   final email = TextEditingController();
+  bool _carregando = false;
 
   bool validarEmail(String email) {
     return email.contains("@") && email.contains(".");
   }
 
-  void recuperar() {
+  Future<void> recuperar() async {
     if (email.text.isEmpty) {
       _erro("Informe o e-mail");
       return;
@@ -23,6 +26,20 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     if (!validarEmail(email.text)) {
       _erro("E-mail inválido");
+      return;
+    }
+
+    setState(() => _carregando = true);
+
+    // Lógica de verificação delegada ao provider
+    final provider = context.read<AuthProvider>();
+    final erro = await provider.recuperarSenha(email.text.trim());
+
+    if (!mounted) return;
+    setState(() => _carregando = false);
+
+    if (erro != null) {
+      _erro(erro);
       return;
     }
 
@@ -68,8 +85,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
-              onPressed: recuperar,
-              child: const Text("Enviar"),
+              onPressed: _carregando ? null : recuperar,
+              child: _carregando
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : const Text("Enviar"),
             ),
           ],
         ),

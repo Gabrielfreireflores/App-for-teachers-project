@@ -1,15 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:device_preview/device_preview.dart';
+import 'package:provider/provider.dart';
+
+import 'providers/auth_provider.dart';
+import 'providers/avaliacoes_provider.dart';
 import 'screens/loading_screen.dart';
 
 void main() {
   runApp(
-    DevicePreview(
-      enabled: true,
-      builder: (context) => const MyApp(),
-    ),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AuthProvider>(
+          create: (_) => AuthProvider(),
+        ),
+        ChangeNotifierProvider<AvaliacoesProvider>(
+          create: (_) => AvaliacoesProvider(),
+        ),
+      ],
+      child: DevicePreview(
+        enabled: true,
+        builder: (context) => const MyApp(),
+      ),
+    ) as Widget,
   );
 }
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
