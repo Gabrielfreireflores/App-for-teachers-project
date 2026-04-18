@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/app_layout.dart';
 
 class TurmasScreen extends StatefulWidget {
@@ -9,8 +10,25 @@ class TurmasScreen extends StatefulWidget {
 }
 
 class _TurmasScreenState extends State<TurmasScreen> {
+  List<String> turmas = [];
 
-  List<String> turmas = ["Matemática", "Português"];
+  @override
+  void initState() {
+    super.initState();
+    carregarTurmas();
+  }
+
+  Future<void> carregarTurmas() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      turmas = prefs.getStringList('turmas') ?? [];
+    });
+  }
+
+  Future<void> salvarTurmas() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList('turmas', turmas);
+  }
 
   void adicionarTurma() {
     TextEditingController controller = TextEditingController();
@@ -22,11 +40,14 @@ class _TurmasScreenState extends State<TurmasScreen> {
         content: TextField(controller: controller),
         actions: [
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               if (controller.text.isNotEmpty) {
                 setState(() {
                   turmas.add(controller.text);
                 });
+
+                await salvarTurmas();
+
                 Navigator.pop(context);
               }
             },
