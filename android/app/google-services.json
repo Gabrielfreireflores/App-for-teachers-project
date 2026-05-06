@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "215763026208",
+    "project_id": "teacher-manager-app-e25b4",
+    "storage_bucket": "teacher-manager-app-e25b4.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:215763026208:android:58b553d3266e3f5b4ad745",
+        "android_client_info": {
+          "package_name": "com.example.flutter_schoolproject"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCN7Q8pi-HbfqLud7jn0T9DxCWSWZVhUP8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
