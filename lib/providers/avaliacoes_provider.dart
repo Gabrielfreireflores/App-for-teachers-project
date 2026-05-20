@@ -1,47 +1,31 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AvaliacoesProvider extends ChangeNotifier {
-  static const _key = 'avaliacoes';
-  List<Map<String, dynamic>> _avaliacoes = [];
+  String get _uid => FirebaseAuth.instance.currentUser!.uid;
+  CollectionReference get _col =>
+      FirebaseFirestore.instance.collection('avaliacoes');
 
-  List<Map<String, dynamic>> get avaliacoes => List.unmodifiable(_avaliacoes);
+  Query get query =>
+      _col.where('userId', isEqualTo: _uid).orderBy('createdAt', descending: true);
 
-  // ─── Inicialização ─────────────────────────────────────────────────────────
-
-  /// Deve ser chamado na inicialização da tela para carregar os dados persistidos.
-  Future<void> carregar() async {
-    final prefs = await SharedPreferences.getInstance();
-    final raw = prefs.getString(_key);
-    if (raw != null) {
-      _avaliacoes = List<Map<String, dynamic>>.from(jsonDecode(raw));
-      notifyListeners();
-    }
-  }
-
-  // ─── Casos de uso ──────────────────────────────────────────────────────────
-
-  /// Persiste uma nova avaliação no SharedPreferences.
-  /// Retorna null em caso de sucesso ou uma mensagem de erro.
   Future<String?> salvarAvaliacao(String nome, String data) async {
-    if (nome.isEmpty || data.isEmpty) {
-      return 'Preencha os campos';
-    }
-
-    _avaliacoes.add({
+    if (nome.isEmpty || data.isEmpty) return 'Preencha os campos';
+    await _col.add({
       'nome': nome,
       'data': data,
-      'criadoEm': DateTime.now().toIso8601String(),
+      'userId': _uid,
+      'createdAt': FieldValue.serverTimestamp(),
     });
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key, jsonEncode(_avaliacoes));
-
-    notifyListeners();
     return null;
   }
 
-  /// Retorna a lista completa de avaliações persistidas.
-  List<Map<String, dynamic>> listarAvaliacoes() => _avaliacoes;
+  Future<void> editar(String docId, String nome, String data) async {
+    await _col.doc(docId).update({'nome': nome, 'data': data});
+  }
+
+  Future<void> excluir(String docId) async {
+    await _col.doc(docId).delete();
+  }
 }

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'dashboard_screen.dart';
+
 
 class LoadingScreen extends StatefulWidget {
   const LoadingScreen({super.key});
@@ -10,17 +13,20 @@ class LoadingScreen extends StatefulWidget {
 
 class _LoadingScreenState extends State<LoadingScreen> {
 
-  @override
-  void initState() {
-    super.initState();
-
-    Future.delayed(const Duration(seconds: 2), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginScreen()),
-      );
-    });
-  }
+@override
+void initState() {
+  super.initState();
+  Future.delayed(const Duration(seconds: 2), () {
+    final user = FirebaseAuth.instance.currentUser;
+    if (!mounted) return;
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => user != null ? const DashboardScreen() : const LoginScreen(),
+      ),
+    );
+  });
+}
 
   @override
   Widget build(BuildContext context) {

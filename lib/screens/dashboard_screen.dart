@@ -6,6 +6,8 @@ import 'about_screen.dart';
 import 'avaliacoes_screen.dart';
 import 'media_screen.dart';
 import '../utils/app_routes.dart';
+import 'pesquisa_screen.dart';
+
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -101,6 +103,7 @@ class DashboardScreen extends StatelessWidget {
           _buildCard(context, "Sobre", Icons.info, const AboutScreen()),
           _buildCard(context, "Avaliações", Icons.event, const AvaliacoesScreen()),
           _buildCard(context, "Médias", Icons.bar_chart, const MediaScreen()),
+          _buildCard(context, "Pesquisa", Icons.search, const PesquisaScreen()),
         ],
       ),
     );

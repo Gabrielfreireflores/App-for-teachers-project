@@ -1,103 +1,116 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../providers/avaliacoes_provider.dart';
 import '../widgets/app_layout.dart';
 
-
-
-
-class AvaliacoesScreen extends StatefulWidget {
+class AvaliacoesScreen extends StatelessWidget {
   const AvaliacoesScreen({super.key});
 
-  @override
-  State<AvaliacoesScreen> createState() => _AvaliacoesScreenState();
-}
-
-class _AvaliacoesScreenState extends State<AvaliacoesScreen> {
-
-  final nome = TextEditingController();
-  final data = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    // Carrega as avaliações persistidas ao abrir a tela
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<AvaliacoesProvider>().carregar();
-    });
-  }
-
-  Future<void> criar() async {
-    final provider = context.read<AvaliacoesProvider>();
-    final erro = await provider.salvarAvaliacao(nome.text.trim(), data.text.trim());
-
-    if (!mounted) return;
-
-    if (erro != null) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(erro)));
-      return;
-    }
-
-    // Limpa os campos após salvar
-    nome.clear();
-    data.clear();
+  void _abrirDialog(BuildContext context, AvaliacoesProvider provider,
+      {DocumentSnapshot? doc}) {
+    final nomeCtrl = TextEditingController(text: doc?['nome'] ?? '');
+    final dataCtrl = TextEditingController(text: doc?['data'] ?? '');
 
     showDialog(
       context: context,
-      builder: (_) => const AlertDialog(
-        title: Text("Criado"),
-        content: Text("Avaliação criada com sucesso"),
+      builder: (_) => AlertDialog(
+        title: Text(doc == null ? 'Nova Avaliação' : 'Editar Avaliação'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nomeCtrl,
+              decoration: const InputDecoration(labelText: 'Nome'),
+            ),
+            TextField(
+              controller: dataCtrl,
+              decoration: const InputDecoration(labelText: 'Data'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () async {
+              final nome = nomeCtrl.text.trim();
+              final data = dataCtrl.text.trim();
+              if (doc == null) {
+                final erro = await provider.salvarAvaliacao(nome, data);
+                if (erro != null && context.mounted) {
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text(erro)));
+                  return;
+                }
+              } else {
+                await provider.editar(doc.id, nome, data);
+              }
+              if (context.mounted) Navigator.pop(context);
+            },
+            child: const Text('Salvar'),
+          ),
+        ],
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.read<AvaliacoesProvider>();
     return AppLayout(
-      title: "Avaliações",
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      title: 'Avaliações',
+      child: Stack(
         children: [
-
-          // RF004 – Nome da disciplina e versão do app (somente exibição)
-          
-          
-
-          const SizedBox(height: 16),
-
-          TextField(controller: nome, decoration: const InputDecoration(labelText: "Nome")),
-          TextField(controller: data, decoration: const InputDecoration(labelText: "Data")),
-
-          const SizedBox(height: 20),
-
-          ElevatedButton(onPressed: criar, child: const Text("Criar")),
-
-          const SizedBox(height: 24),
-
-          // Lista de avaliações persistidas
-          Consumer<AvaliacoesProvider>(
-            builder: (_, provider, __) {
-              final lista = provider.listarAvaliacoes();
-              if (lista.isEmpty) {
-                return const Text(
-                  'Nenhuma avaliação cadastrada.',
-                  style: TextStyle(color: Colors.grey),
-                );
+          StreamBuilder<QuerySnapshot>(
+            stream: provider.query.snapshots(),
+            builder: (context, snap) {
+              if (snap.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              final docs = snap.data?.docs ?? [];
+              if (docs.isEmpty) {
+                return const Center(
+                    child: Text('Nenhuma avaliação cadastrada.'));
               }
               return ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: lista.length,
+                itemCount: docs.length,
                 itemBuilder: (_, i) {
-                  final item = lista[i];
-                  return ListTile(
-                    title: Text(item['nome'] ?? ''),
-                    subtitle: Text(item['data'] ?? ''),
+                  final doc = docs[i];
+                  return Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.assignment),
+                      title: Text(doc['nome'] ?? ''),
+                      subtitle: Text('Data: ${doc['data'] ?? '—'}'),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.edit, color: Colors.blue),
+                            onPressed: () =>
+                                _abrirDialog(context, provider, doc: doc),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.delete, color: Colors.red),
+                            onPressed: () => provider.excluir(doc.id),
+                          ),
+                        ],
+                      ),
+                    ),
                   );
                 },
               );
             },
+          ),
+          Positioned(
+            bottom: 16,
+            right: 16,
+            child: FloatingActionButton(
+              onPressed: () => _abrirDialog(context, provider),
+              child: const Icon(Icons.add),
+            ),
           ),
         ],
       ),
