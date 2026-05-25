@@ -13,6 +13,27 @@ class AuthProvider with ChangeNotifier {
     return apenasDigitos.hasMatch(telefone) && telefone.length >= 10;
   }
 
+  /// Valida requisitos de senha forte.
+  /// Retorna null se válida, ou mensagem de erro amigável.
+  String? _validarSenha(String senha) {
+    if (senha.length < 6) {
+      return 'A senha deve ter no mínimo 6 caracteres';
+    }
+    if (!RegExp(r'[A-Z]').hasMatch(senha)) {
+      return 'A senha deve conter pelo menos 1 letra maiúscula';
+    }
+    if (!RegExp(r'[a-z]').hasMatch(senha)) {
+      return 'A senha deve conter pelo menos 1 letra minúscula';
+    }
+    if (!RegExp(r'[0-9]').hasMatch(senha)) {
+      return 'A senha deve conter pelo menos 1 número';
+    }
+    if (!RegExp(r'[!@#\$%^&*(),.?":{}|<>_\-+=\[\]\\\/`~;]').hasMatch(senha)) {
+      return 'A senha deve conter pelo menos 1 caractere especial (!@#\$%...)';
+    }
+    return null;
+  }
+
   Future<String?> login(String email, String password) async {
     if (email.isEmpty || password.isEmpty) return 'Preencha todos os campos';
     try {
@@ -42,6 +63,10 @@ class AuthProvider with ChangeNotifier {
     }
     if (senha != confirmarSenha) return 'As senhas não coincidem';
 
+    // ADICIONADO: validação forte de senha antes de chamar o Firebase
+    final erroSenha = _validarSenha(senha);
+    if (erroSenha != null) return erroSenha;
+
     try {
       debugPrint('[cadastrarUsuario] Criando usuário no Auth...');
       final credential = await _auth.createUserWithEmailAndPassword(
@@ -59,7 +84,6 @@ class AuthProvider with ChangeNotifier {
       await user.updateDisplayName(nome);
       debugPrint('[cadastrarUsuario] displayName atualizado');
 
-      // CORRIGIDO: adicionado userId ao documento (campo obrigatório da coleção)
       await FirebaseFirestore.instance.collection('usuarios').doc(user.uid).set({
         'userId': user.uid,
         'nome': nome,
