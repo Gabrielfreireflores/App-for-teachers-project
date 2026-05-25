@@ -3,15 +3,25 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/app_layout.dart';
 
-class NotasScreen extends StatelessWidget {
+class NotasScreen extends StatefulWidget {
   const NotasScreen({super.key});
 
-  String get _uid => FirebaseAuth.instance.currentUser!.uid;
-  CollectionReference get _col =>
-      FirebaseFirestore.instance.collection('notas');
+  @override
+  State<NotasScreen> createState() => _NotasScreenState();
+}
 
-  Query get _query =>
-      _col.where('userId', isEqualTo: _uid).orderBy('createdAt', descending: true);
+class _NotasScreenState extends State<NotasScreen> {
+  late final Stream<QuerySnapshot> _stream;
+  late final CollectionReference _col;
+  late final String _uid;
+
+  @override
+  void initState() {
+    super.initState();
+    _uid = FirebaseAuth.instance.currentUser!.uid;
+    _col = FirebaseFirestore.instance.collection('notas');
+    _stream = _col.where('userId', isEqualTo: _uid).snapshots();
+  }
 
   void _abrirDialog(BuildContext context, {DocumentSnapshot? doc}) {
     final alunoCtrl = TextEditingController(text: doc?['aluno'] ?? '');
@@ -67,10 +77,12 @@ class NotasScreen extends StatelessWidget {
                   'createdAt': FieldValue.serverTimestamp(),
                 });
               } else {
+                // CORRIGIDO: adicionado updatedAt na edição
                 await doc.reference.update({
                   'aluno': aluno,
                   'disciplina': disciplina,
                   'nota': nota,
+                  'updatedAt': FieldValue.serverTimestamp(),
                 });
               }
               if (context.mounted) Navigator.pop(context);
@@ -89,12 +101,29 @@ class NotasScreen extends StatelessWidget {
       child: Stack(
         children: [
           StreamBuilder<QuerySnapshot>(
-            stream: _query.snapshots(),
+            stream: _stream,
             builder: (context, snap) {
+              if (snap.hasError) {
+                debugPrint('[NotasScreen] Erro no stream: ${snap.error}');
+                return Center(
+                  child: Text(
+                    'Erro ao carregar notas:\n${snap.error}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                );
+              }
               if (snap.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
-              final docs = snap.data?.docs ?? [];
+              final docs = [...(snap.data?.docs ?? [])];
+              docs.sort((a, b) {
+                final ta = a['createdAt'] as Timestamp?;
+                final tb = b['createdAt'] as Timestamp?;
+                if (ta == null) return -1;
+                if (tb == null) return 1;
+                return tb.compareTo(ta);
+              });
               if (docs.isEmpty) {
                 return const Center(child: Text('Nenhuma nota cadastrada.'));
               }

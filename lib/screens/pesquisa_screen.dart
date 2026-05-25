@@ -11,12 +11,13 @@ class PesquisaScreen extends StatefulWidget {
 }
 
 class _PesquisaScreenState extends State<PesquisaScreen> {
-  String _uid = FirebaseAuth.instance.currentUser!.uid;
+  final String _uid = FirebaseAuth.instance.currentUser!.uid;
   String _busca = '';
   String _colecao = 'alunos';
 
   final _cols = ['alunos', 'turmas', 'notas', 'avaliacoes'];
 
+  // Getter aqui é intencional: precisa mudar de stream quando _colecao muda via setState
   Stream<QuerySnapshot> get _stream => FirebaseFirestore.instance
       .collection(_colecao)
       .where('userId', isEqualTo: _uid)
@@ -63,6 +64,17 @@ class _PesquisaScreenState extends State<PesquisaScreen> {
             child: StreamBuilder<QuerySnapshot>(
               stream: _stream,
               builder: (context, snap) {
+                // CORRIGIDO: adicionado tratamento de erro
+                if (snap.hasError) {
+                  debugPrint('[PesquisaScreen] Erro no stream: ${snap.error}');
+                  return Center(
+                    child: Text(
+                      'Erro ao buscar dados:\n${snap.error}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  );
+                }
                 if (snap.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
                 }
@@ -83,7 +95,7 @@ class _PesquisaScreenState extends State<PesquisaScreen> {
                       child: ListTile(
                         leading: const Icon(Icons.search),
                         title: Text(titulo),
-                        subtitle: subtit.isNotEmpty ? Text(subtit) : null,
+                        subtitle: subtit.toString().isNotEmpty ? Text(subtit) : null,
                       ),
                     );
                   },

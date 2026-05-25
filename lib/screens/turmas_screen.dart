@@ -3,15 +3,25 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/app_layout.dart';
 
-class TurmasScreen extends StatelessWidget {
+class TurmasScreen extends StatefulWidget {
   const TurmasScreen({super.key});
 
-  String get _uid => FirebaseAuth.instance.currentUser!.uid;
-  CollectionReference get _col =>
-      FirebaseFirestore.instance.collection('turmas');
+  @override
+  State<TurmasScreen> createState() => _TurmasScreenState();
+}
 
-  Query get _query =>
-      _col.where('userId', isEqualTo: _uid).orderBy('nome');
+class _TurmasScreenState extends State<TurmasScreen> {
+  late final Stream<QuerySnapshot> _stream;
+  late final CollectionReference _col;
+  late final String _uid;
+
+  @override
+  void initState() {
+    super.initState();
+    _uid = FirebaseAuth.instance.currentUser!.uid;
+    _col = FirebaseFirestore.instance.collection('turmas');
+    _stream = _col.where('userId', isEqualTo: _uid).snapshots();
+  }
 
   void _abrirDialog(BuildContext context, {DocumentSnapshot? doc}) {
     final nomeCtrl = TextEditingController(text: doc?['nome'] ?? '');
@@ -62,10 +72,12 @@ class TurmasScreen extends StatelessWidget {
                   'createdAt': FieldValue.serverTimestamp(),
                 });
               } else {
+                // CORRIGIDO: adicionado updatedAt na edição
                 await doc.reference.update({
                   'nome': nome,
                   'periodo': periodoCtrl.text.trim(),
                   'turno': turnoCtrl.text.trim(),
+                  'updatedAt': FieldValue.serverTimestamp(),
                 });
               }
               if (context.mounted) Navigator.pop(context);
@@ -84,12 +96,27 @@ class TurmasScreen extends StatelessWidget {
       child: Stack(
         children: [
           StreamBuilder<QuerySnapshot>(
-            stream: _query.snapshots(),
+            stream: _stream,
             builder: (context, snap) {
+              if (snap.hasError) {
+                debugPrint('[TurmasScreen] Erro no stream: ${snap.error}');
+                return Center(
+                  child: Text(
+                    'Erro ao carregar turmas:\n${snap.error}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                );
+              }
               if (snap.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
-              final docs = snap.data?.docs ?? [];
+              final docs = [...(snap.data?.docs ?? [])];
+              docs.sort((a, b) {
+                final nomeA = (a['nome'] ?? '').toString().toLowerCase();
+                final nomeB = (b['nome'] ?? '').toString().toLowerCase();
+                return nomeA.compareTo(nomeB);
+              });
               if (docs.isEmpty) {
                 return const Center(child: Text('Nenhuma turma cadastrada.'));
               }

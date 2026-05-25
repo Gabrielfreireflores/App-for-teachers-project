@@ -5,129 +5,145 @@ import '../widgets/app_layout.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
-class AlunosScreen extends StatelessWidget {
+class AlunosScreen extends StatefulWidget {
   const AlunosScreen({super.key});
 
-  String get _uid => FirebaseAuth.instance.currentUser!.uid;
-  CollectionReference get _col =>
-      FirebaseFirestore.instance.collection('alunos');
-
-  Query get _query => _col.where('userId', isEqualTo: _uid).orderBy('nome');
-
-  void _abrirDialog(BuildContext context, {DocumentSnapshot? doc}) {
-  final nomeCtrl = TextEditingController(text: doc?['nome'] ?? '');
-  final matriculaCtrl = TextEditingController(text: doc?['matricula'] ?? '');
-  final cepCtrl = TextEditingController(text: doc?['cep'] ?? '');
-  final enderecoCtrl = TextEditingController(text: doc?['endereco'] ?? '');
-  bool buscando = false;
-
-  Future<void> buscarCep(StateSetter setState) async {
-    final cep = cepCtrl.text.replaceAll(RegExp(r'\D'), '');
-    if (cep.length != 8) return;
-    setState(() => buscando = true);
-    try {
-      final res = await http.get(Uri.parse('https://viacep.com.br/ws/$cep/json/'));
-      final data = jsonDecode(res.body);
-      if (data['erro'] == null) {
-        enderecoCtrl.text =
-            '${data['logradouro']}, ${data['bairro']} - ${data['localidade']}/${data['uf']}';
-      } else {
-        enderecoCtrl.text = 'CEP não encontrado';
-      }
-    } catch (_) {
-      enderecoCtrl.text = 'Erro ao buscar CEP';
-    }
-    setState(() => buscando = false);
-  }
-
-  showDialog(
-    context: context,
-    builder: (_) => StatefulBuilder(
-      builder: (context, setState) => AlertDialog(
-        title: Text(doc == null ? 'Novo Aluno' : 'Editar Aluno'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nomeCtrl,
-                decoration: const InputDecoration(labelText: 'Nome'),
-              ),
-              TextField(
-                controller: matriculaCtrl,
-                decoration: const InputDecoration(labelText: 'Matrícula'),
-              ),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: cepCtrl,
-                      keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(labelText: 'CEP'),
-                      onChanged: (_) {
-                        if (cepCtrl.text.replaceAll(RegExp(r'\D'), '').length == 8) {
-                          buscarCep(setState);
-                        }
-                      },
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  buscando
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : IconButton(
-                          icon: const Icon(Icons.search),
-                          onPressed: () => buscarCep(setState),
-                        ),
-                ],
-              ),
-              TextField(
-                controller: enderecoCtrl,
-                readOnly: true,
-                decoration: const InputDecoration(labelText: 'Endereço'),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancelar'),
-          ),
-          TextButton(
-            onPressed: () async {
-              final nome = nomeCtrl.text.trim();
-              if (nome.isEmpty) return;
-              final payload = {
-                'nome': nome,
-                'matricula': matriculaCtrl.text.trim(),
-                'cep': cepCtrl.text.trim(),
-                'endereco': enderecoCtrl.text.trim(),
-              };
-              if (doc == null) {
-                await _col.add({
-                  ...payload,
-                  'userId': _uid,
-                  'createdAt': FieldValue.serverTimestamp(),
-                });
-              } else {
-                await doc.reference.update(payload);
-              }
-              if (context.mounted) Navigator.pop(context);
-            },
-            child: const Text('Salvar'),
-          ),
-        ],
-      ),
-    ),
-  );
+  @override
+  State<AlunosScreen> createState() => _AlunosScreenState();
 }
 
-  void _excluir(DocumentSnapshot doc) {
-    doc.reference.delete();
+class _AlunosScreenState extends State<AlunosScreen> {
+  late final Stream<QuerySnapshot> _stream;
+  late final CollectionReference _col;
+  late final String _uid;
+
+  @override
+  void initState() {
+    super.initState();
+    _uid = FirebaseAuth.instance.currentUser!.uid;
+    _col = FirebaseFirestore.instance.collection('alunos');
+    _stream = _col.where('userId', isEqualTo: _uid).snapshots();
+  }
+
+  void _abrirDialog(BuildContext context, {DocumentSnapshot? doc}) {
+    final nomeCtrl = TextEditingController(text: doc?['nome'] ?? '');
+    final matriculaCtrl = TextEditingController(text: doc?['matricula'] ?? '');
+    final cepCtrl = TextEditingController(text: doc?['cep'] ?? '');
+    final enderecoCtrl = TextEditingController(text: doc?['endereco'] ?? '');
+    bool buscando = false;
+
+    Future<void> buscarCep(StateSetter setState) async {
+      final cep = cepCtrl.text.replaceAll(RegExp(r'\D'), '');
+      if (cep.length != 8) return;
+      setState(() => buscando = true);
+      try {
+        final res = await http.get(Uri.parse('https://viacep.com.br/ws/$cep/json/'));
+        final data = jsonDecode(res.body);
+        if (data['erro'] == null) {
+          enderecoCtrl.text =
+              '${data['logradouro']}, ${data['bairro']} - ${data['localidade']}/${data['uf']}';
+        } else {
+          enderecoCtrl.text = 'CEP não encontrado';
+        }
+      } catch (_) {
+        enderecoCtrl.text = 'Erro ao buscar CEP';
+      }
+      setState(() => buscando = false);
+    }
+
+    showDialog(
+      context: context,
+      builder: (_) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text(doc == null ? 'Novo Aluno' : 'Editar Aluno'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nomeCtrl,
+                  decoration: const InputDecoration(labelText: 'Nome'),
+                ),
+                TextField(
+                  controller: matriculaCtrl,
+                  decoration: const InputDecoration(labelText: 'Matrícula'),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: cepCtrl,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(labelText: 'CEP'),
+                        onChanged: (_) {
+                          if (cepCtrl.text.replaceAll(RegExp(r'\D'), '').length == 8) {
+                            buscarCep(setState);
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    buscando
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : IconButton(
+                            icon: const Icon(Icons.search),
+                            onPressed: () => buscarCep(setState),
+                          ),
+                  ],
+                ),
+                TextField(
+                  controller: enderecoCtrl,
+                  readOnly: true,
+                  decoration: const InputDecoration(labelText: 'Endereço'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            TextButton(
+              onPressed: () async {
+                final nome = nomeCtrl.text.trim();
+                if (nome.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Nome obrigatório')),
+                  );
+                  return;
+                }
+                if (doc == null) {
+                  await _col.add({
+                    'nome': nome,
+                    'matricula': matriculaCtrl.text.trim(),
+                    'cep': cepCtrl.text.trim(),
+                    'endereco': enderecoCtrl.text.trim(),
+                    'userId': _uid,
+                    'createdAt': FieldValue.serverTimestamp(),
+                  });
+                } else {
+                  // CORRIGIDO: adicionado updatedAt na edição
+                  await doc.reference.update({
+                    'nome': nome,
+                    'matricula': matriculaCtrl.text.trim(),
+                    'cep': cepCtrl.text.trim(),
+                    'endereco': enderecoCtrl.text.trim(),
+                    'updatedAt': FieldValue.serverTimestamp(),
+                  });
+                }
+                if (context.mounted) Navigator.pop(context);
+              },
+              child: const Text('Salvar'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -137,12 +153,27 @@ class AlunosScreen extends StatelessWidget {
       child: Stack(
         children: [
           StreamBuilder<QuerySnapshot>(
-            stream: _query.snapshots(),
+            stream: _stream,
             builder: (context, snap) {
+              if (snap.hasError) {
+                debugPrint('[AlunosScreen] Erro no stream: ${snap.error}');
+                return Center(
+                  child: Text(
+                    'Erro ao carregar alunos:\n${snap.error}',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                );
+              }
               if (snap.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
-              final docs = snap.data?.docs ?? [];
+              final docs = [...(snap.data?.docs ?? [])];
+              docs.sort((a, b) {
+                final nomeA = (a['nome'] ?? '').toString().toLowerCase();
+                final nomeB = (b['nome'] ?? '').toString().toLowerCase();
+                return nomeA.compareTo(nomeB);
+              });
               if (docs.isEmpty) {
                 return const Center(child: Text('Nenhum aluno cadastrado.'));
               }
@@ -155,9 +186,9 @@ class AlunosScreen extends StatelessWidget {
                       leading: const Icon(Icons.person),
                       title: Text(doc['nome'] ?? ''),
                       subtitle: Text(
-                                      'Matrícula: ${doc['matricula'] ?? '—'}'
-                                      '${doc['endereco'] != null && doc['endereco'].toString().isNotEmpty ? '\n${doc['endereco']}' : ''}',
-                                    ),
+                        'Matrícula: ${doc['matricula'] ?? '—'}'
+                        '${doc['endereco'] != null && doc['endereco'].toString().isNotEmpty ? '\n${doc['endereco']}' : ''}',
+                      ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -167,7 +198,7 @@ class AlunosScreen extends StatelessWidget {
                           ),
                           IconButton(
                             icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => _excluir(doc),
+                            onPressed: () => doc.reference.delete(),
                           ),
                         ],
                       ),

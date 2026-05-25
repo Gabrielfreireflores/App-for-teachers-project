@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-
 class AuthProvider with ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -15,16 +14,9 @@ class AuthProvider with ChangeNotifier {
   }
 
   Future<String?> login(String email, String password) async {
-    if (email.isEmpty || password.isEmpty) {
-      return 'Preencha todos os campos';
-    }
-
+    if (email.isEmpty || password.isEmpty) return 'Preencha todos os campos';
     try {
-      await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
       notifyListeners();
       return null;
     } on FirebaseAuthException catch (e) {
@@ -51,12 +43,40 @@ class AuthProvider with ChangeNotifier {
     if (senha != confirmarSenha) return 'As senhas não coincidem';
 
     try {
-      await _auth.createUserWithEmailAndPassword(email: email, password: senha);
-      await _auth.currentUser?.updateDisplayName(nome);
+      debugPrint('[cadastrarUsuario] Criando usuário no Auth...');
+      final credential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: senha,
+      );
+
+      final user = credential.user;
+      if (user == null) {
+        debugPrint('[cadastrarUsuario] Erro: user é null após criação');
+        return 'Erro inesperado ao criar usuário';
+      }
+
+      debugPrint('[cadastrarUsuario] Auth OK — uid: ${user.uid}');
+      await user.updateDisplayName(nome);
+      debugPrint('[cadastrarUsuario] displayName atualizado');
+
+      // CORRIGIDO: adicionado userId ao documento (campo obrigatório da coleção)
+      await FirebaseFirestore.instance.collection('usuarios').doc(user.uid).set({
+        'userId': user.uid,
+        'nome': nome,
+        'email': email,
+        'telefone': telefone,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      debugPrint('[cadastrarUsuario] Dados salvos no Firestore');
+
       notifyListeners();
       return null;
     } on FirebaseAuthException catch (e) {
+      debugPrint('[cadastrarUsuario] FirebaseAuthException: ${e.code}');
       return _traduzirErro(e.code);
+    } catch (e) {
+      debugPrint('[cadastrarUsuario] Erro inesperado: $e');
+      return 'Erro inesperado: $e';
     }
   }
 

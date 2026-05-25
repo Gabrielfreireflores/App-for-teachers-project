@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -16,9 +17,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final telefone = TextEditingController();
   final senha = TextEditingController();
   final confirmarSenha = TextEditingController();
-  final bool _carregando = false;
+  
+  bool _carregando = false;
 
 Future<void> cadastrar() async {
+  setState(() => _carregando = true);
+
   final provider = context.read<AuthProvider>();
 
   final erro = await provider.cadastrarUsuario(
@@ -30,13 +34,14 @@ Future<void> cadastrar() async {
   );
 
   if (!mounted) return;
+  setState(() => _carregando = false);
 
   if (erro != null) {
     _erro(erro);
     return;
   }
 
-  showDialog(
+  await showDialog(
     context: context,
     builder: (_) => AlertDialog(
       title: const Text("Sucesso"),
@@ -48,6 +53,13 @@ Future<void> cadastrar() async {
         )
       ],
     ),
+  );
+
+  
+  if (!mounted) return;
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (_) => const LoginScreen()),
   );
 }
 
