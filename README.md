@@ -150,10 +150,6 @@ flutter run
  Em desenvolvimento
 
 Funcionalidades futuras:
-
--   Autenticação de usuários
-    
--   Integração com backend
     
 -   Sincronização em nuvem
     
@@ -161,7 +157,6 @@ Funcionalidades futuras:
     
 -   Notificações
     
-
 ----------
 
 ## 💡 Objetivo
