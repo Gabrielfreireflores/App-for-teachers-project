@@ -43,3 +43,28 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Firebase
+.firebase/
+
+# Flutter generated
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Build
+build/
+
+# Dart tool
+.dart_tool/
+
+# IDE
+.vscode/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Firebase debug
+firebase-debug.log
