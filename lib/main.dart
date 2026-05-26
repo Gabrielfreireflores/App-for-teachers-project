@@ -1,6 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:device_preview/device_preview.dart';
 import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/avaliacoes_provider.dart';
@@ -24,10 +23,7 @@ void main() async {
           create: (_) => AvaliacoesProvider(),
         ),
       ],
-      child: DevicePreview(
-        enabled: true,
-        builder: (context) => const MyApp(),
-      ),
+      child: const MyApp(),
     ) as Widget,
   );
 }
@@ -67,8 +63,6 @@ class MyApp extends StatelessWidget {
     ),
   ),
 ),
-      builder: DevicePreview.appBuilder,
-      locale: DevicePreview.locale(context),
       debugShowCheckedModeBanner: false,
       home: const LoadingScreen(),
     );
