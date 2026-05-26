@@ -37,7 +37,7 @@ class AboutScreen extends StatelessWidget {
         SizedBox(height: 20),
 
         Text(
-          "Versão 1.1.8",
+          "Versão 1.2.1",
           textAlign: TextAlign.center,
         ),
 
